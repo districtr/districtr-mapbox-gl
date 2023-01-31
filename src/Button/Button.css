@@ -1,0 +1,27 @@
+.d-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  border: 1px solid var(--foreground);
+  border-radius: 4px;
+  background-color: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  font-size: 1rem;
+  text-decoration: none;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.d-button--full-width {
+  width: 100%;
+}
+
+.d-button:active,
+.d-button--pressed {
+  background-color: var(--foreground);
+  color: var(--background);
+}
