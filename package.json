@@ -1,15 +1,12 @@
 {
-  "name": "@districtr/districtr-mapbox-gl",
-  "version": "0.0.3",
+  "name": "districtr-mapbox-gl",
+  "version": "0.0.4",
   "main": "build/index.js",
   "module": "build/index.esm.js",
   "private": false,
   "files": [
     "build"
   ],
-  "publishConfig": {
-    "@districtr:registry": "https://npm.pkg.github.com"
-  },
   "types": "build/index.d.ts",
   "description": "A React component library for adding Districtr drawing tools to Mapbox GL",
   "scripts": {
@@ -45,8 +42,8 @@
   "homepage": "https://github.com/districtr/districtr-mapbox-gl#readme",
   "peerDependencies": {
     "mapbox-gl": ">=2.0.0",
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
