@@ -10,13 +10,13 @@ Districtr is the open-source web app that empowers all people to draw districtin
 
 This platform is part of a suite of programs that create Districtr.org.
 
-- districtr-cms: A Wagtail CMS and API that manage the pages and data on the Districtr site..
-- districtr-client: The Districtr site built on Gatsby
+- [districtr-cms](https://github.com/districtr/districtr-cms): A Wagtail CMS and API that manage the pages and data on the Districtr site..
+- [districtr-site](https://github.com/districtr/districtr-site): The Districtr site built on Gatsby
 - Other Districtr and MGGG data tools
 
 ### Contributing
 
-This suite is under active development and will eventually replace the existing Districtr repository behind Districtr.org.
+This suite is under active development and will eventually replace the existing Districtr repository behind [Districtr.org](https://districtr.org).
 
 You can develop this project independently or along with other Districtr projects. If you are interested in contributing, thank you! You can visit the Github Project for the Districtr Reboot and see if there any of our open issues or milestones that you feel you could help with. You can also send an email to engineering@mggg.org to learn more about opportunities with Districtr and MGGG.
 
@@ -31,15 +31,15 @@ Requires:
 1. Install Districtr in your project
 
 ```
-npm install @districtr/districtr-mapbox-gl
+npm install districtr-mapbox-gl
 ```
 
 2. Import Districtr and Districtr CSS into your project.
 
 ```TSX
 import React from "react";
-import { Districtr } from "@districtr/districtr-mapbox-gl"
-import "@districtr/districtr-mapbox-gl/build/districtr-mapbox-gl.css"
+import { Districtr } from "districtr-mapbox-gl"
+import "districtr-mapbox-gl/build/districtr-mapbox-gl.css"
 
 ```
 
@@ -47,8 +47,8 @@ import "@districtr/districtr-mapbox-gl/build/districtr-mapbox-gl.css"
 
 ```TSX
 import React from "react";
-import { Districtr } from "@districtr/districtr-mapbox-gl"
-import "@districtr/districtr-mapbox-gl/build/districtr-mapbox-gl.css"
+import { Districtr } from "districtr-mapbox-gl"
+import "districtr-mapbox-gl/build/districtr-mapbox-gl.css"
 
 const App = () => {
 
@@ -166,17 +166,6 @@ export default App;
 ```
 
 ## Development
-
-You can develop this project independently or along with the Districtr site front-end. You can use yarn to set up a workspace with this project and districtr-client.
-
-```
-/districtr
-  /districtr-mapbox-gl
-  /districtr-client
-
-$ yarn workspace districtr-map-gl develop
-$ yarn workspace districtr-client develop
-```
 
 This library uses:
 

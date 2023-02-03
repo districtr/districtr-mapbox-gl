@@ -32,7 +32,12 @@
     "Rollup",
     "Typescript",
     "Sass",
-    "Storybook"
+    "Storybook",
+    "Mapbox",
+    "districtr",
+    "redistricting",
+    "map",
+    "redistricting tool"
   ],
   "author": "MGGG",
   "license": "MIT",
