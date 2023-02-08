@@ -184,7 +184,6 @@ const Districtr: React.FC<DistrictrProps> = ({
     } else {
       setCursor('crosshair')
       setDrawingMode(true)
-      setColoring(true)
     }
   }, [activeTool])
 
