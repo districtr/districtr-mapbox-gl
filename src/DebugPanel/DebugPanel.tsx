@@ -68,7 +68,6 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ map, layers, title, units, acti
           <ul className="d-debug-panel__list">
             {layers &&
               layers.map((layer: { config: any; name: string; interactive: boolean }) => {
-                console.log(layer)
                 if (layer.interactive) {
                   return null
                 }
