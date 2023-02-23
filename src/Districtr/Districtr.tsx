@@ -5,6 +5,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import Button from '../Button'
 import Cursor from '../Cursor'
 import DebugPanel from '../DebugPanel'
+import Toolbar from '../Toolbar'
+import { getUnitColorProperty, getUnitOutlineColor, updateUnitsColorScheme } from '../utils/colors'
 import { convertBrushSizeToPixels, getBoxAroundPoint } from '../utils/geometry'
 import { generateUnits } from '../utils/units'
 import './Districtr.css'
@@ -44,7 +46,72 @@ const Districtr: React.FC<DistrictrProps> = ({
   unitName = 'District',
   unitNamePlural = 'Districts',
   unitType = 'single',
-  columnSets = {}
+  columnSets = {},
+  toolsConfig = {
+    brush: {
+      name: 'brush',
+      icon: 'B',
+      tooltip: 'Brush Tool',
+      cursor: 'brush',
+      shortcut: 'b',
+      enabled: true,
+      size: 50,
+      options: {
+        inputs: [
+          {
+            type: 'colorPicker',
+            name: 'Brush Color',
+            property: 'color',
+            config: {
+              color: '#000000',
+              defaultUnitCount: 1
+            }
+          },
+          {
+            type: 'rangeSlider',
+            name: 'Brush Size',
+            property: 'size',
+            config: {
+              align: 'vertical',
+              min: 1,
+              max: 100
+            }
+          }
+        ]
+      }
+    },
+    pan: {
+      name: 'pan',
+      icon: 'P',
+      tooltip: 'Pan Tool',
+      cursor: 'pan',
+      shortcut: 'p',
+      enabled: true
+    },
+    eraser: {
+      name: 'eraser',
+      icon: 'E',
+      tooltip: 'Eraser Tool',
+      cursor: 'eraser',
+      shortcut: 'e',
+      enabled: true,
+      size: 50,
+      options: {
+        inputs: [
+          {
+            type: 'rangeSlider',
+            name: 'Eraser Size',
+            property: 'size',
+            config: {
+              align: 'vertical',
+              min: 1,
+              max: 100
+            }
+          }
+        ]
+      }
+    }
+  }
 }) => {
   const [map, setMap] = useState<Map>(null)
   const [cursor, setCursor] = useState<'pointer' | 'grab' | 'grabbing' | 'crosshair'>('grab')
@@ -53,7 +120,8 @@ const Districtr: React.FC<DistrictrProps> = ({
   const [activeTool, setActiveTool] = useState<ActiveToolProps>({
     name: 'brush'
   })
-  const [brushSize, setBrushSize] = useState<number>(20)
+  const [tools, setTools] = useState<ToolsConfigProps>(toolsConfig)
+
   const [hoveredFeatures, setHoveredFeatures] = useState<MapboxGeoJSONFeature[]>([])
   const [coloring, setColoring] = useState<boolean>(false)
   const [activeUnit, setActiveUnit] = useState<number>(1)
@@ -78,6 +146,8 @@ const Districtr: React.FC<DistrictrProps> = ({
 
   const [debug, setDebug] = useState<boolean>(false)
 
+  const [colorScheme, setColorScheme] = useState<string[]>([])
+
   const mapboxContainerRef = useRef(null)
 
   const prevPoint = useRef<Point>(null)
@@ -97,7 +167,8 @@ const Districtr: React.FC<DistrictrProps> = ({
       dragRotate: false,
       preserveDrawingBuffer: true,
       dragPan: true,
-      touchZoomRotate: true
+      boxZoom: false,
+      touchZoomRotate: true,
     })
 
     map.setPadding(initialViewState.padding)
@@ -349,6 +420,47 @@ const Districtr: React.FC<DistrictrProps> = ({
       brushSize.current = 0
     }
   }, [tools])
+
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+    const newColorScheme = []
+
+    // for each key in units add the color to the color scheme
+    Object.keys(units).forEach((unit) => {
+      newColorScheme.push(units[unit].color)
+    })
+
+    if (colorScheme.toString() !== newColorScheme.toString()) {
+      setColorScheme(newColorScheme)
+      const defaultInteractiveColorScheme = getUnitColorProperty(units)
+      const defaultInteractiveOutlineColorScheme = getUnitOutlineColor(units)
+
+      // check if the active interactive layer is in the map and the style is loaded
+      if (!map.getLayer(interactiveLayerIds[activeInteractiveLayer]) || !map.isStyleLoaded()) {
+        return
+      }
+
+      // set the paint property for the interactive layer that is currently active
+
+      map.setPaintProperty(interactiveLayerIds[activeInteractiveLayer], 'fill-color', defaultInteractiveColorScheme)
+      map.setPaintProperty(interactiveLayerIds[activeInteractiveLayer], 'fill-opacity', 0.8)
+      // set a paint proerty that set the fill-outline-color if the feature is active
+      map.setPaintProperty(
+        interactiveLayerIds[activeInteractiveLayer],
+        'fill-outline-color',
+        defaultInteractiveOutlineColorScheme
+      )
+    }
+  }, [units])
+
+  const onZoom = (e: ViewStateChangeEvent) => {
+    if (currentZoom !== map.getZoom()) {
+      setCurrentZoom(map.getZoom())
+    }
+  }
+
   const onMove = (e: ViewStateChangeEvent) => {
     //console.log("dragPan", map.dragPan.isEnabled())
   }
@@ -542,18 +654,24 @@ const Districtr: React.FC<DistrictrProps> = ({
           <li className="districtr-toolbar-item">
             <Button onClick={() => changeActiveUnit('next')}>Next</Button>
           </li>
-          <li className="districtr-toolbar-item">
-            <Button onClick={() => map.zoomOut({ duration: 200 })}>Zoom -</Button>
-          </li>
-          <li className="districtr-toolbar-item">
-            <Button onClick={() => map.zoomIn({ duration: 200 })}>Zoom +</Button>
-          </li>
-          <li className="districtr-toolbar-item">
-            <Button onClick={() => setDebug(!debug)}>{debug ? 'Hide' : 'Show'} Debug</Button>
-          </li>
         </ul>
       </div>
+
       <div id={mapboxContainerId} className="districtr-mapbox" ref={mapboxContainerRef}>
+        <Toolbar
+          position={'left'}
+          tools={tools}
+          setTools={setTools}
+          activeTool={activeTool}
+          setActiveTool={setActiveTool}
+          units={units}
+          setUnits={setUnits}
+          activeUnit={activeUnit}
+        >
+          <ul className="d-toolbar-group d-toolbar-group--bottom">
+            <li className="d-toolbar-item"></li>
+          </ul>
+        </Toolbar>
         {debug && (
           <DebugPanel
             map={map}
@@ -564,6 +682,30 @@ const Districtr: React.FC<DistrictrProps> = ({
             title={title}
           />
         )}
+        <Toolbar position={'right'} units={units} setUnits={setUnits}>
+          <ul className="d-toolbar-group d-toolbar-group--top">
+            <li className="d-toolbar-item">
+              <Button onClick={() => map.zoomIn({ duration: 200 })}>+</Button>
+            </li>
+            <li className="d-toolbar-item">
+              <Button onClick={() => map.zoomOut({ duration: 200 })}>-</Button>
+            </li>
+          </ul>
+
+          <ul className="d-toolbar-group d-toolbar-group--bottom">
+            <li className="districtr-toolbar-item">
+              <Button pressed={debug} onClick={() => setDebug(!debug)}>
+                D
+              </Button>
+            </li>
+          </ul>
+
+          <ul className="d-toolbar-group d-toolbar-group--bottom">
+            <li className="districtr-toolbar-item">
+              <Button>T</Button>
+            </li>
+          </ul>
+        </Toolbar>
         <Cursor
           visible={cursorVisible}
           size={brushSize.current}

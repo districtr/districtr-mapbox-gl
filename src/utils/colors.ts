@@ -121,8 +121,23 @@ export function changeColorLuminance(hex, lum) {
   return rgb
 }
 
-// Right now I'm assuming colors are numbered, and that -1 or null means
-// a block hasn't been colored. I don't think this is a good system.
+export const getUnitOutlineColor = (units) => {
+  const unitList = Object.keys(units).map((key) => units[key])
+
+  const unitOutlineColorStyle = [
+    'case',
+    ['==', ['feature-state', 'active'], false],
+    [
+      'match',
+      ['feature-state', 'unit'],
+      ...unitList.map((unit) => [unit.id, unit.color]).reduce((list, unit) => [...list, ...unit]),
+      'rgba(0, 0, 0, 0)'
+    ],
+    '#000000'
+  ]
+
+  return unitOutlineColorStyle
+}
 
 export function getUnitColorProperty(units) {
   console.log(units)
@@ -144,6 +159,13 @@ export function getUnitColorProperty(units) {
     '#aaaaaa'
   ]
 
+  const activeUnitColorStyle = [
+    'match',
+    ['feature-state', 'unit'],
+    ...unitList.map((unit) => [unit.id, unit.selectedColor]).reduce((list, unit) => [...list, ...unit]),
+    '#aaaaaa'
+  ]
+
   const standardColor = ['case', ['boolean', ['feature-state', 'hover'], false], hoveredUnitColorStyle, unitColorStyle]
 
   const blendWithHoverOption = [
@@ -159,6 +181,8 @@ export function getUnitColorProperty(units) {
     blendWithHoverOption,
     standardColor
   ]
+
+  console.log(unitColorProperty)
 
   return unitColorProperty
 }

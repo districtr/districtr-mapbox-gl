@@ -11,6 +11,8 @@ import {
 } from 'mapbox-gl'
 
 import { ColorPickerProps } from '../ColorPicker/ColorPicker.types'
+import { RangeSliderProps } from '../RangeSlider/RangeSlider.types'
+
 export interface UnitProps {
   /** The unit number */
   id: number
@@ -21,7 +23,7 @@ export interface UnitProps {
   /** Number of seats available. Not a sub unit.  */
   members?: number
   /** The district color */
-  color?: string | boolean
+  color?: string
   /** The district color when hovered. */
   hoverColor?: string
   /** The district color when selected. */
@@ -104,11 +106,51 @@ export interface ActiveToolProps {
   name: 'pan' | 'brush' | 'eraser' | 'inspect'
 }
 
-export interface BrushOptionProps {
-  /** The size of the brush in pixels.
-   * @default 20
+export interface AnyInputProps {
+  /** The type of input for the option */
+  type: 'rangeSlider' | 'colorPicker' | 'checkbox' | 'radio' | 'select'
+  /** The name of the option */
+  name: string
+  /** The property that the input controls on the tool */
+  property: string
+  /** The configuration for the input */
+  config: ColorPickerProps | RangeSliderProps
+}
+
+export interface AnyToolProps {
+  /** The name of the tool */
+  name: string
+  /** The icon for the tool */
+  icon: string
+  /** The tooltip for the tool */
+  tooltip: string
+  /** The cursor for the tool */
+  cursor: string
+  /** The keyboard shortcut for the tool. */
+  shortcut?: string
+  /** Is the tool enabled
+   * @default true
    */
-  radius: number
+  enabled?: boolean
+}
+
+export interface BrushToolProps extends AnyToolProps {
+  /** The size of the brush in meters.
+   * @default 5000
+   */
+  size: number
+  /** The brush tool options configuration */
+  options?: {
+    /** the inputs and their configuration */
+    inputs: AnyInputProps[]
+  }
+}
+
+export interface ToolsConfigProps {
+  /** The default tool */
+  brush?: BrushToolProps
+  eraser?: BrushToolProps
+  pan?: AnyToolProps
 }
 
 export interface DistrictrProps {
@@ -160,6 +202,9 @@ export interface DistrictrProps {
 
   /** Old columnset structures for testing */
   columnSets?: any
+
+  /** Tools available and their configurations */
+  toolsConfig?: ToolsConfigProps
 }
 
 export type ViewStateChangeEvent =

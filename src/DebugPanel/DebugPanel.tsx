@@ -13,6 +13,30 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ map, layers, title, units, acti
     unitColor = currentUnit.color
   }
 
+  const createColumnPopulations = (unit: any) => {
+    // if unit does not have columnPopulations return null
+    if (!unit.columnPopulations) {
+      return null
+    }
+
+    const columnPopulations = []
+
+    // for every key in unit.columnPopulations create a div with the value
+    Object.keys(unit.columnPopulations).forEach((key) => {
+      if (unit.columnPopulations[key]) {
+        columnPopulations.push(
+          <div key={key}>
+            {key}: {unit.columnPopulations[key].toLocaleString()}
+          </div>
+        )
+      }
+    })
+
+    return columnPopulations
+  }
+
+  const columnPopulations = createColumnPopulations(currentUnit)
+
   return (
     <div data-testid="DebugPanel" className="d-debug-panel d-debug-panel--scrollable ">
       <div className="d-debug-panel__content">
@@ -32,6 +56,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ map, layers, title, units, acti
             </div>
             <div>Unit Pop.: {currentUnit.population.toLocaleString()}</div>
             <div>Pop/Ideal: {currentUnit.idealPopulation.toLocaleString()}</div>
+            {columnPopulations}
           </div>
         </div>
 

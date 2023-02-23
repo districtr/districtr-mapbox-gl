@@ -26,6 +26,11 @@
   color: var(--background);
 }
 
+.d-button--toolbar {
+  width: 36px;
+  height: 36px;
+}
+
 .d-button--swatch {
   width: 24px;
   height: 24px;
