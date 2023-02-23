@@ -40,7 +40,12 @@ jest.mock('mapbox-gl', () => ({
     doubleClickZoom: {
       enable: jest.fn(),
       disable: jest.fn()
-    }
+    },
+    getLayer: jest.fn(() => ({
+      id: 'counties-draw'
+    })),
+    isStyleLoaded: jest.fn(() => true),
+    setPaintProperty: jest.fn()
   }))
 }))
 
@@ -60,7 +65,8 @@ describe('Test Component', () => {
             min: 0,
             sum: 360000000,
             name: 'Total Population'
-          }
+          },
+          subgroups: [{ key: 'POP100', max: 100, min: 0, sum: 360000000, name: 'Total Population' }]
         }
       ]
     }

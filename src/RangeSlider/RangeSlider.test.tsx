@@ -1,27 +1,38 @@
+import { render } from '@testing-library/react'
+import React from 'react'
 
-import React from "react";
-import { render } from "@testing-library/react";
+import RangeSlider from './RangeSlider'
+import { RangeSliderProps } from './RangeSlider.types'
 
-import RangeSlider from "./RangeSlider";
-import { RangeSliderProps } from "./RangeSlider.types";
-
-describe("Test Component", () => {
-  let props: RangeSliderProps;
+describe('Test Component', () => {
+  let props: RangeSliderProps
 
   beforeEach(() => {
     props = {
-      foo: "bar"
-    };
-  });
+      name: 'test',
+      min: 0,
+      max: 100,
+      align: 'horizontal'
+    }
+  })
 
-  const renderComponent = () => render(<RangeSlider {...props} />);
+  const renderComponent = () => render(<RangeSlider {...props} />)
 
-  it("should render foo text correctly", () => {
-    props.foo = "test foo text";
-    const { getByTestId } = renderComponent();
+  it('should render horizontal alignment', () => {
+    props.align = 'horizontal'
+    const { getByTestId } = renderComponent()
 
-    const component = getByTestId("RangeSlider");
+    const component = getByTestId('RangeSlider')
 
-    expect(component).toHaveTextContent("test foo text");
-  });
-});
+    expect(component).toHaveClass('d-rangeslider--horizontal')
+  })
+
+  it('should render vertical alignment', () => {
+    props.align = 'vertical'
+    const { getByTestId } = renderComponent()
+
+    const component = getByTestId('RangeSlider')
+
+    expect(component).toHaveClass('d-rangeslider--vertical')
+  })
+})

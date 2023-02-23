@@ -9,7 +9,8 @@ describe('Test Component', () => {
 
   beforeEach(() => {
     props = {
-      color: '#FFFFFF'
+      color: '#FFFFFF',
+      defaultUnitCount: 10
     }
   })
 

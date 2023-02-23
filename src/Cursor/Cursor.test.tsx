@@ -1,27 +1,30 @@
+import { render } from '@testing-library/react'
+import React from 'react'
 
-import React from "react";
-import { render } from "@testing-library/react";
+import Cursor from './Cursor'
+import { CursorProps } from './Cursor.types'
 
-import Cursor from "./Cursor";
-import { CursorProps } from "./Cursor.types";
-
-describe("Test Component", () => {
-  let props: CursorProps;
+describe('Test Component', () => {
+  let props: CursorProps
 
   beforeEach(() => {
     props = {
-      foo: "bar"
-    };
-  });
+      size: 50,
+      tool: 'brush',
+      position: { x: 0, y: 0 },
+      visible: true
+    }
+  })
 
-  const renderComponent = () => render(<Cursor {...props} />);
+  const renderComponent = () => render(<Cursor {...props} />)
 
-  it("should render foo text correctly", () => {
-    props.foo = "test foo text";
-    const { getByTestId } = renderComponent();
+  it('should render size', () => {
+    props.size = 50
+    const { getByTestId } = renderComponent()
 
-    const component = getByTestId("Cursor");
+    const component = getByTestId('Cursor')
 
-    expect(component).toHaveTextContent("test foo text");
-  });
-});
+    expect(component).toHaveStyle('width: 141.4213562373095px')
+    expect(component).toHaveStyle('height: 141.4213562373095px')
+  })
+})
