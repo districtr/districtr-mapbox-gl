@@ -1,0 +1,61 @@
+.d-rangeslider {
+  display: flex;
+}
+
+.d-rangeslider.d-rangeslider--vertical {
+  margin-top: 12px;
+  width: 48px;
+  height: 160px;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.d-rangeslider.d-rangeslider--horizontal {
+  flex-direction: row;
+  align-items: center;
+}
+
+.d-rangeslider.d-rangeslider--horizontal .d-range {
+  height: 12px;
+}
+
+.d-rangeslider.d-rangeslider--vertical .d-range {
+  width: 100px;
+  padding: 10px 10px 0;
+  margin: 0 10px;
+  transform: rotate(270deg);
+}
+
+.d-input-number {
+  border: none;
+  background-color: transparent;
+  color: var(--foreground);
+  font-size: 1rem;
+  text-align: center;
+  padding: 4px 2px;
+  margin: 0;
+  outline: none;
+  border-radius: 3px;
+  border: 2px solid var(--foreground);
+  width: 36px;
+  font-size: 0.85rem;
+}
+
+.d-rangeslider.d-rangeslider--horizontal .d-input-number {
+  margin-right: 6px;
+}
+
+.d-rangeslider.d-rangeslider--vertical .d-input-number {
+  margin-top: 8px;
+}
+
+.d-input-number::-webkit-outer-spin-button,
+.d-input-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.d-input-number[type='number'] {
+  -moz-appearance: textfield;
+}
