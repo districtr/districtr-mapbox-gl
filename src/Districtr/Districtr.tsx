@@ -339,8 +339,8 @@ const Districtr: React.FC<DistrictrProps> = ({
       })
 
       if (JSON.stringify(newUnits) !== JSON.stringify(units)) {
-      setUnits(newUnits)
-    }
+        setUnits(newUnits)
+      }
     }
   }, [unitAssignments])
 
@@ -572,7 +572,7 @@ const Districtr: React.FC<DistrictrProps> = ({
   }
 
   const onMouseUp = (e: MapLayerMouseEvent) => {
-      setColoring(false)
+    setColoring(false)
   }
 
   const onMouseDown = (e: MapLayerMouseEvent) => {
@@ -684,11 +684,18 @@ const Districtr: React.FC<DistrictrProps> = ({
     }
 
     for (const layerId of interactiveLayerIds) {
-      const defaultInteractiveColorScheme = getUnitColorProperty(units)
+      if (layerId === interactiveLayerIds[activeInteractiveLayer]) {
+        const defaultInteractiveColorScheme = getUnitColorProperty(units)
+        const defaultInteractiveOutlineColorScheme = getUnitOutlineColor(units)
+        map.setPaintProperty(layerId, 'fill-outline-color', defaultInteractiveOutlineColorScheme)
+        map.setPaintProperty(layerId, 'fill-color', defaultInteractiveColorScheme)
+        map.setPaintProperty(layerId, 'fill-opacity', 0.8)
+      } else {
+        map.setPaintProperty(layerId, 'fill-color', 'rgba(0,0,0,0)')
+        map.setPaintProperty(layerId, 'fill-opacity', 0)
 
-      map.setPaintProperty(layerId, 'fill-outline-color', 'rgba(0, 0, 0, 0.5)')
-      map.setPaintProperty(layerId, 'fill-color', defaultInteractiveColorScheme)
-      map.setPaintProperty(layerId, 'fill-opacity', 0.8)
+        map.setPaintProperty(layerId, 'fill-outline-color', 'rgba(0,0,0,0)')
+      }
     }
   }
 
