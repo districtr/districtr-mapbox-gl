@@ -10,6 +10,7 @@ import {
   SymbolLayer
 } from 'mapbox-gl'
 
+import { ColorPickerProps } from '../ColorPicker/ColorPicker.types'
 export interface UnitProps {
   /** The unit number */
   id: number

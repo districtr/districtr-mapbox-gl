@@ -25,3 +25,27 @@
   background-color: var(--foreground);
   color: var(--background);
 }
+
+.d-button--swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: transform 0.2s ease-in-out;
+}
+
+.d-button--swatch:active,
+.d-button--swatch.d-button--pressed {
+  background-color: inherit;
+  color: inherit;
+}
+
+/* When .d-button-swatch is hovered or focused increased the size by 15% */
+.d-button--swatch:hover,
+.d-button--swatch:focus {
+  transform: scale(1.15);
+  cursor: pointer;
+}
+
+.d-button--swatch.d-button--pressed {
+  transform: scale(1.15);
+}

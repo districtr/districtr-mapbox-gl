@@ -1,3 +1,5 @@
+import schemes from './schemes'
+
 /**
  * Global Districtr color map for districts.
  *
@@ -57,10 +59,11 @@ let _colorScheme = [
 /**
  * District color scheme given a certain number if units
  */
-export const getColorScheme = (unitCount) => {
+export const getColorScheme = (unitCount, colorScheme = _colorScheme) => {
+  console.log(colorScheme)
   let colors = []
   for (let i = 0; i < unitCount; i++) {
-    colors.push(_colorScheme[i % _colorScheme.length])
+    colors.push(colorScheme[i % colorScheme.length])
   }
   return colors
 }
@@ -68,10 +71,10 @@ export const getColorScheme = (unitCount) => {
 /**
  * Darker colors for when the user hovers over assigned units.
  */
-export const getHoverColorScheme = (unitCount) => {
+export const getHoverColorScheme = (unitCount, colorScheme = _colorScheme) => {
   let colors = []
   for (let i = 0; i < unitCount; i++) {
-    colors.push(changeColorLuminance(_colorScheme[i % _colorScheme.length], -0.15))
+    colors.push(changeColorLuminance(colorScheme[i % colorScheme.length], -0.15))
   }
   return colors
 }
@@ -79,10 +82,10 @@ export const getHoverColorScheme = (unitCount) => {
 /**
  * Brighter colors for when the district is in an active state.
  */
-export const getSelectedColorScheme = (unitCount) => {
+export const getSelectedColorScheme = (unitCount, colorScheme = _colorScheme) => {
   let colors = []
   for (let i = 0; i < unitCount; i++) {
-    colors.push(changeColorLuminance(_colorScheme[i % _colorScheme.length], 0.15))
+    colors.push(changeColorLuminance(colorScheme[i % colorScheme.length], 0.15))
   }
   return colors
 }
@@ -175,4 +178,26 @@ export const highlightUnassignedUnitBordersPaintProperty = {
   'line-color': ['case', ['==', ['feature-state', 'color'], null], '#ff4f49', unitBordersPaintProperty['line-color']],
   'line-width': ['case', ['==', ['feature-state', 'color'], null], 4, 1],
   'line-opacity': ['case', ['==', ['feature-state', 'color'], null], 0.8, 0.3]
+}
+
+export const updateUnitsColorScheme = (units, colorScheme) => {
+  console.log(colorScheme)
+  const unitList = Object.keys(units).map((key) => units[key])
+  const colors = getColorScheme(unitList.length, colorScheme)
+  const hoverColors = getHoverColorScheme(unitList.length, colorScheme)
+  const selectedColors = getSelectedColorScheme(unitList.length, colorScheme)
+
+  unitList.forEach((unit, i) => {
+    unit.color = colors[i]
+    unit.hoverColor = hoverColors[i]
+    unit.selectedColor = selectedColors[i]
+  })
+
+  const newUnits = {}
+
+  unitList.forEach((unit) => {
+    newUnits[unit.id] = unit
+  })
+
+  return newUnits
 }

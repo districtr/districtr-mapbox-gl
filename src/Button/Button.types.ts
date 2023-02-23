@@ -8,7 +8,7 @@ export interface ButtonProps {
   /** Button size */
   size?: 'small' | 'medium' | 'large'
   /** Button variant styles */
-  variant?: 'primary' | 'warning' | 'toolbar' | 'text'
+  variant?: 'primary' | 'warning' | 'toolbar' | 'text' | 'swatch'
   /** Text alignemnt of text in button  */
   textAlign?: 'left' | 'center' | 'right'
   /** Expands horizonatlly to fill parent width */
@@ -43,6 +43,8 @@ export interface ButtonProps {
   ariaDescribedBy?: string
   /** Indicated that the button is checked / pressed. */
   ariaChecked?: boolean
+  /** Inline CSS Styles */
+  style?: React.CSSProperties
   /** Callback when button is clicked */
   onClick?(): void
   /** Callback when button is pressed */

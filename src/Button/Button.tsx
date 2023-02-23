@@ -30,6 +30,7 @@ const Button: React.FC<ButtonProps> = ({
   ariaExpanded,
   ariaDescribedBy,
   ariaChecked,
+  style,
   onClick,
   onFocus,
   onBlur,
@@ -71,6 +72,7 @@ const Button: React.FC<ButtonProps> = ({
         onTouchStart={onTouchStart}
         onPointerDown={onPointerDown}
         tabIndex={disabled ? -1 : undefined}
+        style={style}
       >
         {children}
       </a>
@@ -98,6 +100,7 @@ const Button: React.FC<ButtonProps> = ({
         onKeyUp={onKeyUp}
         onKeyDown={onKeyDown}
         tabIndex={disabled ? -1 : undefined}
+        style={style}
       >
         {children}
       </button>
