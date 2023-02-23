@@ -169,6 +169,17 @@ const Districtr: React.FC<DistrictrProps> = ({
       dragPan: true,
       boxZoom: false,
       touchZoomRotate: true,
+      transformRequest: (url, resourceType) => {
+        if (resourceType === 'Source' && url.startsWith('http://api.districtr.org')) {
+          return {
+            url: url,
+            headers: {
+              Authorization: 'Token *FUTURE TOKEN*',
+              'Access-Control-Allow-Origin': '*'
+            }
+          }
+        }
+      }
     })
 
     map.setPadding(initialViewState.padding)
