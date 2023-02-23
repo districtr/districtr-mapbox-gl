@@ -3,12 +3,19 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import React, { useEffect, useRef, useState } from 'react'
 
 import Button from '../Button'
+import Cursor from '../Cursor'
 import DebugPanel from '../DebugPanel'
-import { getUnitColorProperty } from '../utils/colors'
-import { getBoxAroundPoint } from '../utils/geometry'
+import { convertBrushSizeToPixels, getBoxAroundPoint } from '../utils/geometry'
 import { generateUnits } from '../utils/units'
 import './Districtr.css'
-import { ActiveToolProps, DistrictrProps, LayerProps, SourceProps, ViewStateChangeEvent } from './Districtr.types'
+import {
+  ActiveToolProps,
+  DistrictrProps,
+  LayerProps,
+  SourceProps,
+  ToolsConfigProps,
+  ViewStateChangeEvent
+} from './Districtr.types'
 
 const Districtr: React.FC<DistrictrProps> = ({
   mapboxContainerId = 'districtr-mapbox',
@@ -66,10 +73,17 @@ const Districtr: React.FC<DistrictrProps> = ({
   const [sumPopulation, setSumPopulation] = useState<number>(
     columnSets[interactiveLayerIds[activeInteractiveLayer]].columnSets[0].total.sum
   )
+  const [currentZoom, setCurrentZoom] = useState<number>(initialViewState.zoom)
+  const [cursorVisible, setCursorVisible] = useState<boolean>(true)
 
   const [debug, setDebug] = useState<boolean>(false)
 
   const mapboxContainerRef = useRef(null)
+
+  const prevPoint = useRef<Point>(null)
+  const brushSize = useRef<number>(50)
+
+  const mousePosition = useRef<{ x: number; y: number }>(null)
 
   useEffect(() => {
     mapboxgl.accessToken = mapboxAccessToken
@@ -143,12 +157,16 @@ const Districtr: React.FC<DistrictrProps> = ({
     map.on('load', onLoad)
     map.on('move', onMove)
     map.on('mousemove', onMouseMove)
+    map.on('mouseenter', onMouseEnter)
     map.on('mouseleave', onMouseLeave)
+    map.on('mouseover', onMouseOver)
+    map.on('mouseout', onMouseOut)
     map.on('mousedown', onMouseDown)
     map.on('mouseup', onMouseUp)
     map.on('touchstart', onMouseDown)
     map.on('touchmove', onMouseMove)
     map.on('touchend', onMouseUp)
+    map.on('zoom', onZoom)
 
     if (drawingMode) {
       map.dragPan.disable()
@@ -296,6 +314,41 @@ const Districtr: React.FC<DistrictrProps> = ({
     }
   }, [hoveredFeatures])
 
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    if (drawingMode && cursorVisible) {
+      map.getCanvas().style.cursor = 'crosshair'
+    } else {
+      map.getCanvas().style.cursor = ''
+    }
+  }, [cursorVisible])
+
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    if ('size' in tools[activeTool.name]) {
+      brushSize.current = convertBrushSizeToPixels(currentZoom, tools[activeTool.name].size)
+    } else {
+      brushSize.current = 0
+    }
+  }, [currentZoom])
+
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    if ('size' in tools[activeTool.name]) {
+      brushSize.current = convertBrushSizeToPixels(currentZoom, tools[activeTool.name].size)
+    } else {
+      brushSize.current = 0
+    }
+  }, [tools])
   const onMove = (e: ViewStateChangeEvent) => {
     //console.log("dragPan", map.dragPan.isEnabled())
   }
@@ -322,6 +375,25 @@ const Districtr: React.FC<DistrictrProps> = ({
     if (!map) {
       return
     }
+    mousePosition.current = { x: e.point.x, y: e.point.y }
+    const cPoint = e.point
+    let pPoint = prevPoint.current
+    let offsetPoint
+
+    if (!pPoint) {
+      prevPoint.current = cPoint
+      pPoint = prevPoint.current
+    }
+
+    // @ts-ignore
+    const dist = Math.sqrt(Math.pow(cPoint.x - pPoint.x, 2) + Math.pow(cPoint.y - pPoint.y, 2))
+    const rads = Math.atan2(cPoint.y - pPoint.y, cPoint.x - pPoint.x)
+
+    if (dist < brushSize.current / 2) {
+      // returning here prevents the brush from being drawn and could save memory but results in a jittery brush
+      // alternately, tweaking this value could result in a smoother brush for denser areas that slow the unrestrained brush down.
+      //return
+    }
 
     if (activeTool.name === 'brush' || activeTool.name === 'eraser') {
       const interactiveLayer = map.getLayer(interactiveLayerIds[activeInteractiveLayer])
@@ -329,7 +401,7 @@ const Districtr: React.FC<DistrictrProps> = ({
         return
       }
 
-      const box: [PointLike, PointLike] = getBoxAroundPoint(e.point, brushSize)
+      const box: [PointLike, PointLike] = getBoxAroundPoint(cPoint, brushSize.current)
       const features = map.queryRenderedFeatures(box, {
         layers: [interactiveLayerIds[activeInteractiveLayer]]
       })
@@ -339,16 +411,34 @@ const Districtr: React.FC<DistrictrProps> = ({
       } else {
         setHoveredFeatures([])
       }
+      prevPoint.current = cPoint
     }
+  }
+
+  const onMouseEnter = (e: MapLayerMouseEvent) => {
+    setCursorVisible(true)
+  }
+
+  const onMouseOver = (e: MapLayerMouseEvent) => {
+    setCursorVisible(true)
   }
 
   const onMouseLeave = (e: MapLayerMouseEvent) => {
     if (activeTool.name === 'brush' || activeTool.name === 'eraser') {
+      setColoring(false)
       setHoveredFeatures([])
     }
+    setCursorVisible(false)
   }
 
-  const addSources = (map: Map, sources: SourceProps[]) => {
+  const onMouseOut = (e: MapLayerMouseEvent) => {
+    if (activeTool.name === 'brush' || activeTool.name === 'eraser') {
+      setHoveredFeatures([])
+      setColoring(false)
+    }
+    setCursorVisible(false)
+  }
+
     if (sources.length === 0 || !map) {
       return
     }
@@ -417,7 +507,10 @@ const Districtr: React.FC<DistrictrProps> = ({
   }
 
   return (
-    <div data-testid="Districtr" className="districtr">
+    <div
+      data-testid="Districtr"
+      className={`districtr d-cursor-visible-${cursorVisible} d-cursor-drawing-${drawingMode}`}
+    >
       <div className="districtr-toolbar">
         <ul className="districtr-toolbar-items">
           <li className="districtr-toolbar-item">
@@ -471,6 +564,12 @@ const Districtr: React.FC<DistrictrProps> = ({
             title={title}
           />
         )}
+        <Cursor
+          visible={cursorVisible}
+          size={brushSize.current}
+          tool={activeTool.name}
+          position={mousePosition.current}
+        />
       </div>
     </div>
   )
