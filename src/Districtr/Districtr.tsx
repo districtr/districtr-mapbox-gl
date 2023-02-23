@@ -1,4 +1,4 @@
-import mapboxgl, { Map, MapLayerMouseEvent, MapboxGeoJSONFeature, PointLike } from 'mapbox-gl'
+import mapboxgl, { MapLayerMouseEvent, MapboxGeoJSONFeature, Map as MapboxMap, Point, PointLike } from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -26,7 +26,7 @@ const Districtr: React.FC<DistrictrProps> = ({
   initialViewState = {
     longitude: -95.0,
     latitude: 36.5,
-    zoom: 5,
+    zoom: 10,
     pitch: 0,
     bearing: 0,
     bounds: [
@@ -113,8 +113,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     }
   }
 }) => {
-  const [map, setMap] = useState<Map>(null)
-  const [cursor, setCursor] = useState<'pointer' | 'grab' | 'grabbing' | 'crosshair'>('grab')
+  const [map, setMap] = useState<MapboxMap>(null)
   const [drawingMode, setDrawingMode] = useState<boolean>(true)
   const [units, setUnits] = useState(null)
   const [activeTool, setActiveTool] = useState<ActiveToolProps>({
@@ -143,6 +142,9 @@ const Districtr: React.FC<DistrictrProps> = ({
   )
   const [currentZoom, setCurrentZoom] = useState<number>(initialViewState.zoom)
   const [cursorVisible, setCursorVisible] = useState<boolean>(true)
+
+  const [columnKeys, setColumnKeys] = useState<string[]>([])
+  const [unitColumnPopulations, setUnitColumnPopulations] = useState(new Map())
 
   const [debug, setDebug] = useState<boolean>(false)
 
@@ -198,6 +200,28 @@ const Districtr: React.FC<DistrictrProps> = ({
       )
       setUnits(initialUnits)
     }
+
+    // for every column set, for the interactive layer, get the column keys
+    const sourceColumnSets: [] = columnSets[interactiveLayerIds[activeInteractiveLayer]].columnSets
+
+    const columnKeySets: string[] = []
+    //for each item in source column sets, if the type is population
+    //then get the key and set it as the feature key
+    sourceColumnSets.forEach((columnSet: any) => {
+      if (columnSet.total !== null) {
+        if (columnSet.type === 'population') {
+          if (columnSet.total.key === featureKey) {
+            setSumPopulation(columnSet.total.sum)
+          }
+          columnKeySets.push(columnSet.total.key)
+          columnSet.subgroups.forEach((subgroup: any) => {
+            columnKeySets.push(subgroup.key)
+          })
+        }
+      }
+    })
+
+    setColumnKeys(columnKeySets)
   }, [])
 
   useEffect(() => {
@@ -268,21 +292,11 @@ const Districtr: React.FC<DistrictrProps> = ({
     if (!map) {
       return
     }
-    /* TODO: Add SVG styles and animations to the mapbox container */
-    map.getCanvas().style.cursor = cursor
-  }, [cursor])
-
-  useEffect(() => {
-    if (!map) {
-      return
-    }
 
     if (activeTool.name === 'pan') {
-      setCursor('pointer')
       setDrawingMode(false)
       setColoring(false)
     } else {
-      setCursor('crosshair')
       setDrawingMode(true)
     }
   }, [activeTool])
@@ -291,6 +305,7 @@ const Districtr: React.FC<DistrictrProps> = ({
 
   useEffect(() => {
     const populations = {}
+    const columnPopulations = {}
 
     Object.keys(unitAssignments).forEach((geoid) => {
       const unit = unitAssignments[geoid]
@@ -299,6 +314,20 @@ const Districtr: React.FC<DistrictrProps> = ({
       } else {
         populations[unit] = unitPopulations[geoid]
       }
+
+      columnKeys.forEach((columnKey) => {
+        if (!columnPopulations[unit]) {
+          columnPopulations[unit] = {}
+        }
+
+        const recordKey = `${columnKey}-${geoid}`
+
+        if (columnPopulations[unit][columnKey]) {
+          columnPopulations[unit][columnKey] += unitColumnPopulations.get(recordKey)
+        } else {
+          columnPopulations[unit][columnKey] = unitColumnPopulations.get(recordKey)
+        }
+      })
     })
 
     // for every key in populations, setUnits with new units with the population
@@ -306,10 +335,61 @@ const Districtr: React.FC<DistrictrProps> = ({
       const newUnits = { ...units }
       Object.keys(populations).forEach((unit) => {
         newUnits[unit].population = populations[unit]
+        newUnits[unit].columnPopulations = columnPopulations[unit]
       })
+
+      if (JSON.stringify(newUnits) !== JSON.stringify(units)) {
       setUnits(newUnits)
     }
+    }
   }, [unitAssignments])
+
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    const layer = map.getLayer(interactiveLayerIds[activeInteractiveLayer])
+    if (!layer) {
+      return
+    }
+
+    // query all rendered features and set the feature state
+    //@ts-ignore
+    const features = map.queryRenderedFeatures({ layers: [layer.id] })
+    features.forEach((feature) => {
+      // if the feature state unit equals the active unit, set the feature state to active
+      if (feature.state.unit === activeUnit) {
+        map.setFeatureState(
+          {
+            //@ts-ignore
+            source: layer.source,
+            //@ts-ignore
+            sourceLayer: layer.sourceLayer,
+            id: feature.id
+          },
+          {
+            ...feature.state,
+            active: true
+          }
+        )
+      } else {
+        map.setFeatureState(
+          {
+            //@ts-ignore
+            source: layer.source,
+            //@ts-ignore
+            sourceLayer: layer.sourceLayer,
+            id: feature.id
+          },
+          {
+            ...feature.state,
+            active: false
+          }
+        )
+      }
+    })
+  }, [activeUnit])
 
   useEffect(() => {
     if (!map || !units) {
@@ -320,13 +400,19 @@ const Districtr: React.FC<DistrictrProps> = ({
     if (!layer) {
       return
     }
-
     const assignments = unitAssignments
     let populations = {}
+    let cpops = new Map()
 
     hoveredFeatures.forEach((feature) => {
       if (coloring) {
         populations[feature.properties[geometryKey]] = feature.properties[featureKey]
+
+        columnKeys.forEach((columnKey) => {
+          const cpop_key = `${columnKey}-${feature.properties[geometryKey]}`
+          const cpop_value = feature.properties[columnKey]
+          cpops.set(cpop_key, cpop_value)
+        })
 
         let paintUnit = activeUnit
         let paintColor = units[activeUnit].color
@@ -352,7 +438,8 @@ const Districtr: React.FC<DistrictrProps> = ({
             ...feature.state,
             hover: true,
             unit: paintUnit,
-            color: paintColor
+            color: paintColor,
+            active: true
           }
         )
       } else {
@@ -375,6 +462,8 @@ const Districtr: React.FC<DistrictrProps> = ({
 
     setUnitAssignments({ ...assignments })
     setUnitPopulations({ ...unitPopulations, ...populations })
+
+    setUnitColumnPopulations(new Map([...unitColumnPopulations, ...cpops]))
 
     return () => {
       hoveredFeatures.forEach((feature) => {
@@ -483,9 +572,7 @@ const Districtr: React.FC<DistrictrProps> = ({
   }
 
   const onMouseUp = (e: MapLayerMouseEvent) => {
-    if (activeTool.name === 'brush' || activeTool.name === 'eraser') {
       setColoring(false)
-    }
   }
 
   const onMouseDown = (e: MapLayerMouseEvent) => {
@@ -562,6 +649,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     setCursorVisible(false)
   }
 
+  const addSources = (map: MapboxMap, sources: SourceProps[]) => {
     if (sources.length === 0 || !map) {
       return
     }
@@ -575,7 +663,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     return
   }
 
-  const addLayers = (map: Map, layers: LayerProps[]) => {
+  const addLayers = (map: MapboxMap, layers: LayerProps[]) => {
     if (layers.length === 0 || !map) {
       return
     }
@@ -590,7 +678,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     return
   }
 
-  const addInteractiveLayers = (map: Map, interactiveLayerIds: string[]) => {
+  const addInteractiveLayers = (map: MapboxMap, interactiveLayerIds: string[]) => {
     if (!interactiveLayerIds || !map || !units) {
       return
     }
@@ -644,21 +732,7 @@ const Districtr: React.FC<DistrictrProps> = ({
           <li className="districtr-toolbar-item">
             <Button href="/states/">Back</Button>
           </li>
-          <li className="districtr-toolbar-item">
-            <Button pressed={activeTool.name === 'pan' && true} onClick={() => setActiveTool({ name: 'pan' })}>
-              Pan
-            </Button>
-          </li>
-          <li className="districtr-toolbar-item">
-            <Button pressed={activeTool.name === 'brush' && true} onClick={() => setActiveTool({ name: 'brush' })}>
-              Brush
-            </Button>
-          </li>
-          <li className="districtr-toolbar-item">
-            <Button pressed={activeTool.name === 'eraser' && true} onClick={() => setActiveTool({ name: 'eraser' })}>
-              Eraser
-            </Button>
-          </li>
+
           <li className="districtr-toolbar-item">
             <Button onClick={() => changeActiveUnit('previous')}>Previous</Button>
           </li>
