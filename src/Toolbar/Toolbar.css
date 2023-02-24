@@ -2,7 +2,7 @@
   position: absolute;
   width: 48px;
   height: 100%;
-  top: 0;
+  top: 50px;
   bottom: 0;
   z-index: 9999;
   background-color: var(--background);

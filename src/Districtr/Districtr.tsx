@@ -6,7 +6,8 @@ import Button from '../Button'
 import Cursor from '../Cursor'
 import DebugPanel from '../DebugPanel'
 import Toolbar from '../Toolbar'
-import { getUnitColorProperty, getUnitOutlineColor, updateUnitsColorScheme } from '../utils/colors'
+import UnitProperties from '../UnitProperties'
+import { getUnitColorProperty, getUnitOutlineColor } from '../utils/colors'
 import { convertBrushSizeToPixels, getBoxAroundPoint } from '../utils/geometry'
 import { generateUnits } from '../utils/units'
 import './Districtr.css'
@@ -16,6 +17,7 @@ import {
   LayerProps,
   SourceProps,
   ToolsConfigProps,
+  UnitConfigProps,
   ViewStateChangeEvent
 } from './Districtr.types'
 
@@ -36,7 +38,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     padding: { top: 20, bottom: 20, left: 20, right: 20 },
     fitBoundsOptions: { padding: 20 }
   },
-  mapStyle = 'mapbox://styles/mapbox/light-v11',
+  mapStyle = 'light-v11',
   sources,
   layers,
   interactiveLayerIds,
@@ -113,14 +115,66 @@ const Districtr: React.FC<DistrictrProps> = ({
     }
   }
 }) => {
+  const mapStyleOptions = useRef({
+    'streets-v12': {
+      name: 'Streets',
+      url: 'mapbox://styles/mapbox/streets-v12'
+    },
+    'outdoors-v12': {
+      name: 'Outdoors',
+      url: 'mapbox://styles/mapbox/outdoors-v12'
+    },
+    'light-v11': {
+      name: 'Light',
+      url: 'mapbox://styles/mapbox/light-v11'
+    },
+    'dark-v11': {
+      name: 'Dark',
+      url: 'mapbox://styles/mapbox/dark-v11'
+    },
+    'satellite-v9': {
+      name: 'Satellite',
+      url: 'mapbox://styles/mapbox/satellite-v9'
+    },
+    'satellite-streets-v12': {
+      name: 'Satellite Streets',
+      url: 'mapbox://styles/mapbox/satellite-streets-v12'
+    },
+    'navigation-day-v1': {
+      name: 'Navigation Preview Day',
+      url: 'mapbox://styles/mapbox/navigation-preview-day-v4'
+    },
+    'navigation-night-v1': {
+      name: 'Navigation Preview Night',
+      url: 'mapbox://styles/mapbox/navigation-preview-night-v4'
+    }
+  })
+
+  const defaultUnits = {
+    1: {
+      id: 1,
+      name: 'District',
+      type: 'single',
+      members: 1,
+      color: '#FFFFFF',
+      hoverColor: '#FFFFFF',
+      selectedColor: '#FFFFFF',
+      lockedColor: '#FFFFFF',
+      disabledColor: '#FFFFFF',
+      population: 1,
+      idealPopulation: 1,
+      unitIdealPopulation: 1
+    }
+  }
+
   const [map, setMap] = useState<MapboxMap>(null)
   const [drawingMode, setDrawingMode] = useState<boolean>(true)
-  const [units, setUnits] = useState(null)
+  const [units, setUnits] = useState<UnitConfigProps>(defaultUnits)
   const [activeTool, setActiveTool] = useState<ActiveToolProps>({
     name: 'brush'
   })
   const [tools, setTools] = useState<ToolsConfigProps>(toolsConfig)
-
+  const [mapStyleName, setMapStyleName] = useState<string>(mapStyle)
   const [hoveredFeatures, setHoveredFeatures] = useState<MapboxGeoJSONFeature[]>([])
   const [coloring, setColoring] = useState<boolean>(false)
   const [activeUnit, setActiveUnit] = useState<number>(1)
@@ -147,7 +201,7 @@ const Districtr: React.FC<DistrictrProps> = ({
   const [unitColumnPopulations, setUnitColumnPopulations] = useState(new Map())
 
   const [debug, setDebug] = useState<boolean>(false)
-
+  const [rightPanel, setRightPanel] = useState<string>('unit')
   const [colorScheme, setColorScheme] = useState<string[]>([])
 
   const mapboxContainerRef = useRef(null)
@@ -161,7 +215,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     mapboxgl.accessToken = mapboxAccessToken
     const map = new mapboxgl.Map({
       container: mapboxContainerRef.current,
-      style: mapStyle,
+      style: mapStyleOptions.current[mapStyleName].url,
       center: [initialViewState.longitude, initialViewState.latitude],
       zoom: initialViewState.zoom,
       attributionControl: false,
@@ -188,7 +242,7 @@ const Districtr: React.FC<DistrictrProps> = ({
 
     setMap(map)
 
-    if (!units) {
+    if (units === defaultUnits) {
       const initialUnits = generateUnits(
         unitsConfig,
         unitCount,
@@ -201,10 +255,31 @@ const Districtr: React.FC<DistrictrProps> = ({
       setUnits(initialUnits)
     }
 
+    const datasets = {
+      'layer-id': [
+        {
+          name: 'Total Population',
+          source: '2020 Census',
+          type: 'population',
+          totalKey: 'TOTPOP',
+          subgroupKeys: ['NH_WHITE'],
+          totalName: 'Total Population',
+          subgroupName: 'Demographics',
+          metadata: {
+            TOTPOP: { sum: 1000, min: 0, max: 1000, name: 'Total Population' },
+            NH_WHITE: { sum: 1000, min: 0, max: 1000, name: 'White' }
+          },
+          TOTPOP: 1000,
+          NH_WHITE: 1000
+        }
+      ]
+    }
+
     // for every column set, for the interactive layer, get the column keys
     const sourceColumnSets: [] = columnSets[interactiveLayerIds[activeInteractiveLayer]].columnSets
 
     const columnKeySets: string[] = []
+    const newPopulationSets = []
     //for each item in source column sets, if the type is population
     //then get the key and set it as the feature key
     sourceColumnSets.forEach((columnSet: any) => {
@@ -301,6 +376,15 @@ const Districtr: React.FC<DistrictrProps> = ({
     }
   }, [activeTool])
 
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    //update the map style
+    map.setStyle(mapStyleOptions.current[mapStyleName].url)
+  }, [mapStyleName])
+
   useEffect(() => {}, [unitPopulations])
 
   useEffect(() => {
@@ -330,17 +414,21 @@ const Districtr: React.FC<DistrictrProps> = ({
       })
     })
 
-    // for every key in populations, setUnits with new units with the population
     if (units && Object.keys(units).length != 0) {
-      const newUnits = { ...units }
+      let newUnits = JSON.parse(JSON.stringify(units))
+
       Object.keys(populations).forEach((unit) => {
         newUnits[unit].population = populations[unit]
         newUnits[unit].columnPopulations = columnPopulations[unit]
       })
 
-      if (JSON.stringify(newUnits) !== JSON.stringify(units)) {
-        setUnits(newUnits)
-      }
+      Object.keys(units).every((unit) => {
+        if (units[unit].population !== newUnits[unit].population) {
+          setUnits({ ...newUnits })
+          return false
+        }
+        return true
+      })
     }
   }, [unitAssignments])
 
@@ -400,7 +488,8 @@ const Districtr: React.FC<DistrictrProps> = ({
     if (!layer) {
       return
     }
-    const assignments = unitAssignments
+
+    const assignments = { ...unitAssignments }
     let populations = {}
     let cpops = new Map()
 
@@ -415,12 +504,10 @@ const Districtr: React.FC<DistrictrProps> = ({
         })
 
         let paintUnit = activeUnit
-        let paintColor = units[activeUnit].color
 
         if (activeTool.name === 'eraser') {
           delete assignments[feature.properties[geometryKey]]
           paintUnit = 0
-          paintColor = false
         } else {
           assignments[feature.properties[geometryKey]] = activeUnit
         }
@@ -438,7 +525,6 @@ const Districtr: React.FC<DistrictrProps> = ({
             ...feature.state,
             hover: true,
             unit: paintUnit,
-            color: paintColor,
             active: true
           }
         )
@@ -460,10 +546,11 @@ const Districtr: React.FC<DistrictrProps> = ({
       }
     })
 
-    setUnitAssignments({ ...assignments })
-    setUnitPopulations({ ...unitPopulations, ...populations })
-
-    setUnitColumnPopulations(new Map([...unitColumnPopulations, ...cpops]))
+    if (JSON.stringify(unitAssignments) !== JSON.stringify(assignments)) {
+      setUnitAssignments(assignments)
+      setUnitPopulations({ ...unitPopulations, ...populations })
+      setUnitColumnPopulations(new Map([...unitColumnPopulations, ...cpops]))
+    }
 
     return () => {
       hoveredFeatures.forEach((feature) => {
@@ -693,35 +780,9 @@ const Districtr: React.FC<DistrictrProps> = ({
       } else {
         map.setPaintProperty(layerId, 'fill-color', 'rgba(0,0,0,0)')
         map.setPaintProperty(layerId, 'fill-opacity', 0)
-
         map.setPaintProperty(layerId, 'fill-outline-color', 'rgba(0,0,0,0)')
       }
     }
-  }
-
-  const changeActiveUnit = (unitId: string | number) => {
-    const numUnits = Object.keys(units).length
-
-    if (numUnits === 0) {
-      return
-    }
-
-    if (unitId === 'next') {
-      if (activeUnit === numUnits) {
-        setActiveUnit(1)
-      } else {
-        setActiveUnit(activeUnit + 1)
-      }
-    } else if (unitId === 'previous') {
-      if (activeUnit === 1) {
-        setActiveUnit(numUnits)
-      } else {
-        setActiveUnit(activeUnit - 1)
-      }
-    } else {
-      setActiveUnit(unitId as number)
-    }
-    return
   }
 
   return (
@@ -739,32 +800,24 @@ const Districtr: React.FC<DistrictrProps> = ({
           <li className="districtr-toolbar-item">
             <Button href="/states/">Back</Button>
           </li>
-
-          <li className="districtr-toolbar-item">
-            <Button onClick={() => changeActiveUnit('previous')}>Previous</Button>
-          </li>
-          <li className="districtr-toolbar-item">
-            <Button onClick={() => changeActiveUnit('next')}>Next</Button>
-          </li>
         </ul>
       </div>
-
+      <Toolbar
+        position={'left'}
+        tools={tools}
+        setTools={setTools}
+        activeTool={activeTool}
+        setActiveTool={setActiveTool}
+        units={units}
+        setUnits={setUnits}
+        activeUnit={activeUnit}
+      >
+        <ul className="d-toolbar-group d-toolbar-group--bottom">
+          <li className="d-toolbar-item"></li>
+        </ul>
+      </Toolbar>
       <div id={mapboxContainerId} className="districtr-mapbox" ref={mapboxContainerRef}>
-        <Toolbar
-          position={'left'}
-          tools={tools}
-          setTools={setTools}
-          activeTool={activeTool}
-          setActiveTool={setActiveTool}
-          units={units}
-          setUnits={setUnits}
-          activeUnit={activeUnit}
-        >
-          <ul className="d-toolbar-group d-toolbar-group--bottom">
-            <li className="d-toolbar-item"></li>
-          </ul>
-        </Toolbar>
-        {debug && (
+        {rightPanel === 'debug' && (
           <DebugPanel
             map={map}
             layers={layers}
@@ -774,30 +827,17 @@ const Districtr: React.FC<DistrictrProps> = ({
             title={title}
           />
         )}
-        <Toolbar position={'right'} units={units} setUnits={setUnits}>
-          <ul className="d-toolbar-group d-toolbar-group--top">
-            <li className="d-toolbar-item">
-              <Button onClick={() => map.zoomIn({ duration: 200 })}>+</Button>
-            </li>
-            <li className="d-toolbar-item">
-              <Button onClick={() => map.zoomOut({ duration: 200 })}>-</Button>
-            </li>
-          </ul>
 
-          <ul className="d-toolbar-group d-toolbar-group--bottom">
-            <li className="districtr-toolbar-item">
-              <Button pressed={debug} onClick={() => setDebug(!debug)}>
-                D
-              </Button>
-            </li>
-          </ul>
-
-          <ul className="d-toolbar-group d-toolbar-group--bottom">
-            <li className="districtr-toolbar-item">
-              <Button>T</Button>
-            </li>
-          </ul>
-        </Toolbar>
+        {rightPanel === 'unit' && (
+          <UnitProperties
+            units={units}
+            activeUnit={activeUnit}
+            setUnits={setUnits}
+            setActiveUnit={setActiveUnit}
+            columnSets={columnSets[interactiveLayerIds[activeInteractiveLayer]]}
+            columnKeys={columnKeys}
+          ></UnitProperties>
+        )}
         <Cursor
           visible={cursorVisible}
           size={brushSize.current}
@@ -805,6 +845,77 @@ const Districtr: React.FC<DistrictrProps> = ({
           position={mousePosition.current}
         />
       </div>
+      <Toolbar position={'right'} units={units} setUnits={setUnits}>
+        <ul className="d-toolbar-group d-toolbar-group--top">
+          <li className="d-toolbar-item">
+            <Button accessibilityLabel="Zoom In" variant="toolbar" onClick={() => map.zoomIn({ duration: 200 })}>
+              +
+            </Button>
+          </li>
+          <li className="d-toolbar-item">
+            <Button accessibilityLabel="Zoom Out" variant="toolbar" onClick={() => map.zoomOut({ duration: 200 })}>
+              -
+            </Button>
+          </li>
+          <li className="d-toolbar-item">
+            <Button
+              disabled={true}
+              accessibilityLabel="Streets Layer"
+              variant="toolbar"
+              onClick={() => setMapStyleName('light-v11')}
+            >
+              P
+            </Button>
+          </li>
+          <li className="d-toolbar-item">
+            <Button
+              disabled={true}
+              accessibilityLabel="Satellite Layer"
+              variant="toolbar"
+              onClick={() => setMapStyleName('satellite-streets-v12')}
+            >
+              S
+            </Button>
+          </li>
+          <li>
+            <Button
+              disabled={true}
+              accessibilityLabel="Dark Mode"
+              variant="toolbar"
+              onClick={() => setMapStyleName('navigation-night-v1')}
+            >
+              N
+            </Button>
+          </li>
+        </ul>
+
+        <ul className="d-toolbar-group d-toolbar-group--bottom">
+          <li className="districtr-toolbar-item">
+            <Button
+              variant="toolbar"
+              pressed={rightPanel === 'unit'}
+              onClick={() => (rightPanel === 'unit' ? setRightPanel('') : setRightPanel('unit'))}
+            >
+              d
+            </Button>
+          </li>
+          <li className="districtr-toolbar-item">
+            <Button
+              variant="toolbar"
+              pressed={rightPanel === 'debug'}
+              onClick={() => (rightPanel === 'debug' ? setRightPanel('') : setRightPanel('debug'))}
+            >
+              L
+            </Button>
+          </li>
+        </ul>
+
+        <ul className="d-toolbar-group d-toolbar-group--bottom">
+          <li className="districtr-toolbar-item">
+            <Button>T</Button>
+          </li>
+        </ul>
+      </Toolbar>
     </div>
   )
 }

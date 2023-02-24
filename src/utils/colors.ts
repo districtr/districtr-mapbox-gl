@@ -60,7 +60,6 @@ let _colorScheme = [
  * District color scheme given a certain number if units
  */
 export const getColorScheme = (unitCount, colorScheme = _colorScheme) => {
-  console.log(colorScheme)
   let colors = []
   for (let i = 0; i < unitCount; i++) {
     colors.push(colorScheme[i % colorScheme.length])
@@ -140,7 +139,6 @@ export const getUnitOutlineColor = (units) => {
 }
 
 export function getUnitColorProperty(units) {
-  console.log(units)
   // Convert units from a object to a array of objects
   const unitList = Object.keys(units).map((key) => units[key])
 
@@ -181,8 +179,6 @@ export function getUnitColorProperty(units) {
     blendWithHoverOption,
     standardColor
   ]
-
-  console.log(unitColorProperty)
 
   return unitColorProperty
 }

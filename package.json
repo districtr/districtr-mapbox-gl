@@ -46,6 +46,12 @@
   },
   "homepage": "https://github.com/districtr/districtr-mapbox-gl#readme",
   "peerDependencies": {
+    "@visx/axis": "^3.0.1",
+    "@visx/group": "^3.0.0",
+    "@visx/marker": "^3.0.0",
+    "@visx/responsive": "^3.0.0",
+    "@visx/scale": "^3.0.0",
+    "@visx/shape": "^3.0.0",
     "mapbox-gl": ">=2.0.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
@@ -97,6 +103,7 @@
     "prettier": "^2.8.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "resize-observer-polyfill": "^1.5.1",
     "rollup": "^2.56.3",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
