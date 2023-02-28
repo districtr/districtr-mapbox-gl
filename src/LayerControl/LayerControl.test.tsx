@@ -15,21 +15,11 @@ describe('Test Component', () => {
   beforeEach(() => {
     //@ts-ignore
     props = {
+      //@ts-ignore
       layer: {
-        name: 'U.S. County Borders',
-        interactive: false,
-        config: {
-          id: 'counties-borders',
-          source: 'counties',
-          type: 'line',
-          layout: {
-            visibility: 'visible'
-          },
-          paint: {
-            'line-color': '#777777',
-            'line-width': ['interpolate', ['linear'], ['zoom'], 0, 0, 7, 1],
-            'line-opacity': 0.8
-          }
+        id: 'test',
+        metadata: {
+          'mapbox:group': 'test'
         }
       }
     }
@@ -43,6 +33,6 @@ describe('Test Component', () => {
 
     const component = getByTestId('LayerControl')
 
-    expect(component).toHaveTextContent(props.layer.name)
+    expect(component).toHaveTextContent(props.layer.id)
   })
 })

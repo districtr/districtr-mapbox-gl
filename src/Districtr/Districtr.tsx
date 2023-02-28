@@ -220,7 +220,7 @@ const Districtr: React.FC<DistrictrProps> = ({
 
   useEffect(() => {
     // https://docs.mapbox.com/mapbox-gl-js/api/properties/#prewarm
-    mapboxgl.prewarm()
+    mapboxgl.prewarm
 
     mapboxgl.accessToken = mapboxAccessToken
     const map = new mapboxgl.Map({

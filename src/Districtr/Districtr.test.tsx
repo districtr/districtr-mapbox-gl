@@ -29,6 +29,7 @@ jest.mock('mapbox-gl', () => ({
       ]
     })),
     setStyle: jest.fn(),
+    preWarm: jest.fn(),
     dragPan: {
       enable: jest.fn(),
       disable: jest.fn()

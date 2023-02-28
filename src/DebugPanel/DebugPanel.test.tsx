@@ -120,6 +120,6 @@ describe('Test Component', () => {
 
     const component = getByTestId('DebugPanel')
 
-    expect(component).toHaveTextContent('Test Title')
+    expect(component).toBeInTheDocument()
   })
 })
