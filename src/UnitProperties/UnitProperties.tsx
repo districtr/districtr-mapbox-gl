@@ -91,9 +91,7 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
         const newDataset = {}
         availableSets.push(dataset.name)
         if ('total' in dataset && dataset.total !== null) {
-          //@ts-ignore
           newDataset[dataset.total.name] = Math.round(
-            //@ts-ignore
             (units[activeUnit].columnPopulations[dataset.total.key] / units[activeUnit].unitIdealPopulation) * 100
           )
           newDataset['name'] = dataset.total.name
@@ -152,7 +150,7 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
     })
 
     setAllUnitData(newAllUnitData)
-  }, [units, activeUnit])
+  }, [units, activeUnit, columnKeys])
 
   useEffect(() => {
     setChartData([allData[dataSets.indexOf(activeDataSet)]])
@@ -457,7 +455,7 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
           </Button>
         </div>
 
-        <div style={{ marginTop: 12, width: '100%' }}>
+        <div className="d-subgroup-charts" style={{ marginTop: 12, width: '100%' }}>
           {showPanel === 'demographics' &&
             subgroupChartData &&
             subgroupChartData.map((data, i) => {

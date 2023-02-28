@@ -37,6 +37,7 @@ export interface UnitProps {
   /** The ideal population of the unit. */
   idealPopulation?: number
   unitIdealPopulation?: number
+  columnPopulations?: any
 }
 
 export interface UnitConfigProps {
