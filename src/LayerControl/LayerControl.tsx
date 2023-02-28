@@ -5,21 +5,13 @@ import './LayerControl.css'
 import { LayerControlProps } from './LayerControl.types'
 
 const LayerControl: React.FC<LayerControlProps> = ({ map, layer }) => {
-  const [visible, setVisible] = React.useState(
-    // @ts-ignore
-    layer.config.layout.visibility === 'visible'
-      ? true
-      : // @ts-ignore
-      layer.config.layout.visibility === 'none'
-      ? false
-      : false
-  )
+  const [visible, setVisible] = React.useState(true)
 
   const toggleVisibility = () => {
     if (visible) {
-      map.setLayoutProperty(layer.config.id, 'visibility', 'none')
+      map.setLayoutProperty(layer.id, 'visibility', 'none')
     } else {
-      map.setLayoutProperty(layer.config.id, 'visibility', 'visible')
+      map.setLayoutProperty(layer.id, 'visibility', 'visible')
     }
     setVisible(!visible)
   }
@@ -27,7 +19,7 @@ const LayerControl: React.FC<LayerControlProps> = ({ map, layer }) => {
   return (
     <li data-testid="LayerControl" className="layer-control-panel">
       <Button pressed={visible} fullWidth={true} onClick={toggleVisibility}>
-        {visible ? 'hide' : 'show'} {layer.name}
+        {visible ? 'hide' : 'show'} {layer.id}
       </Button>
     </li>
   )
