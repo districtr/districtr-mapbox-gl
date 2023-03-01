@@ -158,6 +158,10 @@ const Districtr: React.FC<DistrictrProps> = ({
     'districtr-v1': {
       name: 'Districtr Light',
       url: 'mapbox://styles/districtr/clek2rian000701o4m5zm294j'
+    },
+    'districtr-md-v1': {
+      name: 'Districtr Maryland Light',
+      url: 'mapbox://styles/districtr/cleos4lys000t01mgngsue9zw'
     }
   })
 
@@ -214,7 +218,7 @@ const Districtr: React.FC<DistrictrProps> = ({
   const mapboxContainerRef = useRef(null)
 
   const prevPoint = useRef<Point>(null)
-  const brushSize = useRef<number>(50)
+  const brushSize = useRef<number>(5000)
 
   const mousePosition = useRef<{ x: number; y: number }>(null)
 
@@ -394,7 +398,6 @@ const Districtr: React.FC<DistrictrProps> = ({
         populations.set(unit, 0)
 
         columnKeys.forEach((columnKey) => {
-          console.log(columnKey)
           if (!columnPopulations.has(unit)) {
             columnPopulations.set(unit, {})
           }
@@ -709,7 +712,6 @@ const Districtr: React.FC<DistrictrProps> = ({
     mousePosition.current = { x: e.point.x, y: e.point.y }
     const cPoint = e.point
     let pPoint = prevPoint.current
-    let offsetPoint
 
     if (!pPoint) {
       prevPoint.current = cPoint
