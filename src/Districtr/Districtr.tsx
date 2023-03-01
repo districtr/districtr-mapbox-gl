@@ -720,10 +720,13 @@ const Districtr: React.FC<DistrictrProps> = ({
     const dist = Math.sqrt(Math.pow(cPoint.x - pPoint.x, 2) + Math.pow(cPoint.y - pPoint.y, 2))
     const rads = Math.atan2(cPoint.y - pPoint.y, cPoint.x - pPoint.x)
 
-    if (dist < brushSize.current / 2) {
+    const offsetFactor = 15
+    const threshold = convertBrushSizeToPixels(currentZoom, brushSize.current) / offsetFactor
+
+    if (dist < threshold) {
       // returning here prevents the brush from being drawn and could save memory but results in a jittery brush
       // alternately, tweaking this value could result in a smoother brush for denser areas that slow the unrestrained brush down.
-      //return
+      return
     }
 
     if (activeTool.name === 'brush' || activeTool.name === 'eraser') {
