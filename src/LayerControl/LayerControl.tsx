@@ -31,23 +31,25 @@ const LayerControl: React.FC<LayerControlProps> = ({ map, layer }) => {
         setOriginalLayoutProperties(layer.layout)
       }
 
-      setLayerName(
-        layer.id
-          .replace(/_/g, ' ')
-          .replace(/-/g, ' ')
-          .replace(/\w\S*/g, (txt) => {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-          })
-      )
+      if (layer.hasOwnProperty('id')) {
+        setLayerName(
+          layer.id
+            .replace(/_/g, ' ')
+            .replace(/-/g, ' ')
+            .replace(/\w\S*/g, (txt) => {
+              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+            })
+        )
 
-      setLayerTypeName(
-        layer.type
-          .replace(/_/g, ' ')
-          .replace(/-/g, ' ')
-          .replace(/\w\S*/g, (txt) => {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-          })
-      )
+        setLayerTypeName(
+          layer.type
+            .replace(/_/g, ' ')
+            .replace(/-/g, ' ')
+            .replace(/\w\S*/g, (txt) => {
+              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+            })
+        )
+      }
     }
   }, [])
 

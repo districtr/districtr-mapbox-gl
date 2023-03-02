@@ -20,7 +20,9 @@ describe('Test Component', () => {
         id: 'test',
         metadata: {
           'mapbox:group': 'test'
-        }
+        },
+        //@ts-ignore
+        type: 'test'
       }
     }
   })
@@ -33,6 +35,6 @@ describe('Test Component', () => {
 
     const component = getByTestId('LayerControl')
 
-    expect(component).toHaveTextContent(props.layer.id)
+    expect(component).toHaveTextContent('Test')
   })
 })

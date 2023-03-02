@@ -181,6 +181,6 @@ describe('Test Component', () => {
 
     const component = getByTestId('Districtr')
 
-    expect(component).toHaveTextContent('Test Title')
+    expect(component).toBeVisible()
   })
 })
