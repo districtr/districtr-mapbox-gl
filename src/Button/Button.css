@@ -16,6 +16,18 @@
   font-weight: 400;
 }
 
+.d-button--small {
+  height: 24px;
+}
+
+.d-button--medium {
+  height: 36px;
+}
+
+.d-button--large {
+  height: 48px;
+}
+
 .d-button--full-width {
   width: 100%;
 }
@@ -29,6 +41,12 @@
 .d-button--toolbar {
   width: 36px;
   height: 36px;
+  padding: 4px;
+}
+
+.d-button--toolbar svg {
+  width: 100%;
+  height: auto;
 }
 
 .d-button--swatch {
@@ -44,6 +62,22 @@
   color: inherit;
 }
 
+.d-button--toggle {
+  border: none;
+  background-color: transparent;
+  color: var(--foreground);
+  padding: 3px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.d-button--toggle:active,
+.d-button--toggle.d-button--pressed {
+  background-color: transparent;
+  color: var(--foreground);
+  transform: rotate(45deg);
+}
+
 /* When .d-button-swatch is hovered or focused increased the size by 15% */
 .d-button--swatch:hover,
 .d-button--swatch:focus {
@@ -53,4 +87,19 @@
 
 .d-button--swatch.d-button--pressed {
   transform: scale(1.15);
+}
+
+.d-button--primary {
+  background-color: var(--brand-primary);
+  color: var(--background);
+  border: 3px solid var(--brand-secondary);
+  border-radius: 3px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
+.d-button--primary svg {
+  fill: var(--background);
+  height: 100%;
+  width: auto;
 }

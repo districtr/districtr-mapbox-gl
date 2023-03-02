@@ -8,7 +8,7 @@ export interface ButtonProps {
   /** Button size */
   size?: 'small' | 'medium' | 'large'
   /** Button variant styles */
-  variant?: 'primary' | 'warning' | 'toolbar' | 'text' | 'swatch'
+  variant?: 'primary' | 'secondary' | 'warning' | 'toolbar' | 'text' | 'swatch' | 'toggle'
   /** Text alignemnt of text in button  */
   textAlign?: 'left' | 'center' | 'right'
   /** Expands horizonatlly to fill parent width */

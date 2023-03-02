@@ -4,6 +4,7 @@ import { ParentSize } from '@visx/responsive'
 import { scaleBand, scaleLinear, scaleOrdinal } from '@visx/scale'
 import { BarStackHorizontal, Line } from '@visx/shape'
 import React, { useEffect } from 'react'
+import { FaArrowCircleLeft, FaArrowCircleRight } from 'react-icons/fa'
 
 import Button from '../Button'
 import './UnitProperties.css'
@@ -216,14 +217,26 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
     <div data-testid="UnitProperties" className={`d-unit-properties d-unit-${getChartStatus()}`}>
       <div className="d-unit-wrapper">
         <div className="d-unit-controls">
-          <Button onClick={() => changeActiveUnit('previous')} className="d-unit-control">
-            &lt;
+          <Button
+            variant="toolbar"
+            onClick={() => changeActiveUnit('previous')}
+            className="d-unit-control"
+            style={{ border: 'none' }}
+          >
+            <FaArrowCircleLeft />
           </Button>
           <div>
-            {activeUnit} of {Object.keys(units).length}
+            <h4>
+              {activeUnit} of {Object.keys(units).length}
+            </h4>
           </div>
-          <Button onClick={() => changeActiveUnit('next')} className="d-unit-control">
-            &gt;
+          <Button
+            variant="toolbar"
+            onClick={() => changeActiveUnit('next')}
+            className="d-unit-control"
+            style={{ border: 'none' }}
+          >
+            <FaArrowCircleRight />
           </Button>
         </div>
         <div className="d-unit-header">
@@ -440,14 +453,17 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
           }}
         >
           <Button
-            variant="primary"
+            fullWidth={true}
+            variant="secondary"
             pressed={showPanel === 'all'}
             onClick={() => (showPanel === 'all' ? setShowPanel('') : setShowPanel('all'))}
           >
             All Units
           </Button>
+          &nbsp;
           <Button
-            variant="primary"
+            fullWidth={true}
+            variant="secondary"
             pressed={showPanel === 'demographics'}
             onClick={() => (showPanel === 'demographics' ? setShowPanel('') : setShowPanel('demographics'))}
           >

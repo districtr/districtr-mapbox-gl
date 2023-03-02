@@ -54,7 +54,8 @@
     "@visx/shape": "^3.0.0",
     "mapbox-gl": ">=2.0.0",
     "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+    "react-dom": ">=16.8.0",
+    "react-icons": "^4.7.1"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",

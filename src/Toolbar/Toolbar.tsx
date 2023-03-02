@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { BiBrush, BiEraser, BiMove } from 'react-icons/bi'
 
 import Button from '../Button'
 import ColorPicker from '../ColorPicker'
@@ -72,6 +73,17 @@ const Toolbar: React.FC<ToolbarProps> = ({
     const toolButtons = []
     for (const [key, value] of Object.entries(tools)) {
       const tool = tools[key]
+      const icon = () => {
+        if (tool.name === 'brush') {
+          return <BiBrush />
+        } else if (tool.name === 'eraser') {
+          return <BiEraser />
+        } else if (tool.name === 'pan') {
+          return <BiMove />
+        } else {
+          return tool.icon
+        }
+      }
       if (tool.enabled) {
         toolButtons.push(
           <li key={key} className="d-toolbar-item">
@@ -80,7 +92,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
               pressed={activeTool.name === tool.name && true}
               onClick={() => setActiveTool({ name: tool.name })}
             >
-              {tool.icon}
+              {icon()}
             </Button>
           </li>
         )
