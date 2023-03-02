@@ -1,6 +1,6 @@
 {
   "name": "districtr-mapbox-gl",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "main": "build/index.js",
   "module": "build/index.esm.js",
   "private": false,
