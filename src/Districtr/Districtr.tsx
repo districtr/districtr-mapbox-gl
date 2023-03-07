@@ -145,6 +145,7 @@ const Districtr: React.FC<DistrictrProps> = ({
     })
 
     map.setPadding(initialViewState.padding)
+    map.setProjection('mercator')
 
     setMap(map)
 
