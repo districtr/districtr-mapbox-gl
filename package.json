@@ -79,7 +79,7 @@
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
     "autoprefixer": "^10.4.13",
-    "babel-loader": "^8.2.2",
+    "babel-loader": "^9.1.2",
     "babel-preset-react-app": "^10.0.0",
     "colors": "^1.4.0",
     "commitizen": "^4.3.0",
