@@ -46,7 +46,8 @@ jest.mock('mapbox-gl', () => ({
       id: 'counties-draw'
     })),
     isStyleLoaded: jest.fn(() => true),
-    setPaintProperty: jest.fn()
+    setPaintProperty: jest.fn(),
+    setProjection: jest.fn()
   }))
 }))
 
