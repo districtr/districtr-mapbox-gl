@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { BiBrush, BiEraser, BiMove } from 'react-icons/bi'
 
 import Button from '../Button'
@@ -20,37 +20,31 @@ const Toolbar: React.FC<ToolbarProps> = ({
   children
 }) => {
   const [panelOpen, setPanelOpen] = React.useState<number | boolean>(false)
-  const [currentColor, setCurrentColor] = React.useState('#FFFFFF')
-  const [unitCount, setUnitCount] = React.useState(0)
+  const [currentColor, setCurrentColor] = React.useState(units[activeUnit].color)
+  const [unitCount, setUnitCount] = React.useState(Object.keys(units).length)
 
-  useEffect(() => {
-    if (units) {
-      setUnitCount(Object.keys(units).length)
-    }
-  }, [units])
+  React.useEffect(() => {
+    setCurrentColor(units[activeUnit].color)
+    setUnitCount(Object.keys(units).length)
+  }, [])
 
-  useEffect(() => {
-    if (units && units[activeUnit] && 'color' in units[activeUnit]) {
-      setCurrentColor(units[activeUnit].color)
-    }
-  }, [units, activeUnit])
+  React.useEffect(() => {
+    setCurrentColor(units[activeUnit].color)
+  }, [activeUnit])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (units && units[activeUnit] && 'color' in units[activeUnit]) {
       const newUnits = units
 
       if (newUnits[activeUnit].color !== currentColor) {
         newUnits[activeUnit].color = currentColor
-
         const newColorScheme = []
-
         // for each key in units add the color to the color scheme
         Object.keys(units).forEach((unit) => {
           newColorScheme.push(newUnits[unit].color)
         })
 
         const updatedUnits = updateUnitsColorScheme(newUnits, newColorScheme)
-
         setUnits({ ...updatedUnits })
       }
     }

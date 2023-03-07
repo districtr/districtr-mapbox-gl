@@ -117,5 +117,8 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@turf/union": "^6.5.0"
   }
 }

@@ -183,29 +183,21 @@ export interface DistrictrProps {
   /** The source for the layer which the user draws map units/districts on. */
   interactiveLayerIds: string[]
 
-  /** An array of preconfigured units. Will prevent generation of district scheme. */
-  unitsConfig?: UnitConfigProps
-
-  /** The number of units/districts that the use can draw on the map. */
-  unitCount?: number
-
-  /** The number of seats available for all districts. */
-  totalMembers?: number
-
-  /** The name of the unit that will be drawn on the map, */
-  unitName?: string
-
-  /** The plural version of the the unit name. */
-  unitNamePlural?: string
-
-  /** The type of unit to be draw. */
-  unitType?: 'single' | 'multi'
+  /** Unit configuration */
+  unitsConfig: UnitConfigProps
 
   /** Old columnset structures for testing */
   columnSets?: any
 
   /** Tools available and their configurations */
   toolsConfig?: ToolsConfigProps
+
+  mapState?: any
+
+  /** Function to send saved map information to */
+  setMapState?: (mapData: any) => void
+
+  saveEnabled?: boolean
 }
 
 export type ViewStateChangeEvent =

@@ -3,7 +3,7 @@
   width: 48px;
   top: 50px;
   bottom: 0;
-  z-index: 9999;
+  z-index: 9000;
   background-color: var(--background);
   display: flex;
   flex-direction: column;

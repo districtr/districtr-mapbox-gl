@@ -10,6 +10,6 @@ export interface ToolbarProps {
   setActiveTool?: (tool: ActiveToolProps) => void
   units?: UnitConfigProps
   setUnits?: (units: UnitConfigProps) => void
-  activeUnit?: number
+  activeUnit: number
   children?: React.ReactNode
 }

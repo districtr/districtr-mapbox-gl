@@ -149,7 +149,6 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
         }
       ]
     })
-
     setAllUnitData(newAllUnitData)
   }, [units, activeUnit, columnKeys])
 
@@ -251,6 +250,7 @@ const UnitProperties: React.FC<UnitPropertiesProps> = ({
                 onChange={(e) => {
                   const newUnits = JSON.parse(JSON.stringify(units))
                   newUnits[activeUnit].name = e.target.value
+                  console.log(newUnits)
                   setUnits({ ...newUnits })
                 }}
               />

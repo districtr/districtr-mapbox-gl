@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import React, { Children } from 'react'
 
+import { mockUnits } from '../utils/mocks'
 import Toolbar from './Toolbar'
 import { ToolbarProps } from './Toolbar.types'
 
@@ -9,14 +10,17 @@ describe('Test Component', () => {
 
   beforeEach(() => {
     props = {
-      position: 'right'
+      position: 'right',
+      activeUnit: 1,
+      units: mockUnits
     }
   })
 
   const renderComponent = () => render(<Toolbar {...props} />)
 
-  it('should render foo text correctly', () => {
+  it('should position class correctly', () => {
     props.position = 'right'
+    props.activeUnit = 1
     const { getByTestId } = renderComponent()
 
     const component = getByTestId('Toolbar')

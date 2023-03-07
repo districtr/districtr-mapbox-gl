@@ -162,11 +162,6 @@ describe('Test Component', () => {
           }
         }
       ],
-      unitCount: 1,
-      totalMembers: 1,
-      unitName: 'District',
-      unitNamePlural: 'Districts',
-      unitType: 'single',
       interactiveLayerIds: ['counties-draw'],
       columnSets: columnSets,
       unitsConfig: testUnits
